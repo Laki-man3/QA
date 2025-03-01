@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма с изображением</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #00FFFF; 
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .image-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid #008080; 
+            box-sizing: border-box;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .form-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-left: 40px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .form-group label.top-label {
+            margin-bottom: 5px;
+            display: block;
+            font-size: 1.2em;
+        }
+        .form-group .input-label {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .form-group .input-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .form-group input {
+            padding: 8px;
+            width: calc(33% - 60px);
+            box-sizing: border-box;
+            border: 5px solid #008080; 
+        }
+        .arrow-button {
+            padding: 5px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid #008080; 
+            background: linear-gradient(to bottom, #00FFFF 0%, #808080 100%); 
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            position: absolute;
+        }
+        .arrow-button.up {
+            top: -10px;
+            right: 440px;
+        }
+        .arrow-button.down {
+            bottom: -10px;
+            right: 440px; 
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-group button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: 5px solid #008080; 
+            background: linear-gradient(to bottom, #00FFFF 0%, #808080 100%); 
+            color: white;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-container">
+            <img src="http://loveisflowers.ru/polarna/func/cannon.jpg" alt="Изображение">
+        </div>
+        <div class="form-container">
+            <div class="form-group">
+                <label for="V" class="top-label">Начальная скорость</label>
+                <div class="input-container">
+                    <label for="V" class="input-label">V =</label>
+                    <input type="text" id="V" name="V">
+                    <button class="arrow-button up" onclick="changeValue('V', 1)">↑</button>
+                    <button class="arrow-button down" onclick="changeValue('V', -1)">↓</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="alpha" class="top-label">Угол выстрела</label>
+                <div class="input-container">
+                    <label for="alpha" class="input-label">α =</label>
+                    <input type="text" id="alpha" name="alpha">
+                    <button class="arrow-button up" onclick="changeValue('alpha', 1)">↑</button>
+                    <button class="arrow-button down" onclick="changeValue('alpha', -1)">↓</button>
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="freezePage()">Старт</button>
+                <button onclick="freezePage()">Следующая</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function freezePage() {
+            alert("Страница зависает...");
+            while (true) {}
+        }
+
+        function changeValue(inputId, change) {
+            const inputField = document.getElementById(inputId);
+            let currentValue = parseFloat(inputField.value) || 0;
+            inputField.value = currentValue + change;
+        }
+    </script>
+</body>
+</html>
