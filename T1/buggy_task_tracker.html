@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTracker - Управление задачами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .language-switcher button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .language-switcher button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .task-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .task-form h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .tasks-list {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .tasks-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .task-item {
+            background: white;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .task-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .task-description {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .task-priority {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .priority-high { background: #ffebee; color: #c62828; }
+        .priority-medium { background: #fff3e0; color: #ef6c00; }
+        .priority-low { background: #e8f5e8; color: #2e7d32; }
+        
+        .task-date {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .online {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .offline {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .print-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        @media print {
+            body { 
+                background: white !important; 
+                color: black !important;
+            }
+            .header { 
+                background: white !important; 
+                color: black !important;
+            }
+            .no-print { 
+                display: none !important; 
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status online" id="connectionStatus">Подключено</div>
+    
+    <div class="container">
+        <div class="header">
+            <button class="print-btn no-print" onclick="printTasks()">🖨️ Print</button>
+            <div class="language-switcher no-print">
+                <button onclick="changeLanguage('ru')">RU</button>
+                <button onclick="changeLanguage('en')">EN</button>
+            </div>
+            <h1 id="mainTitle">TaskTracker</h1>
+            <p id="subtitle">Управление задачами и проектами</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="task-form">
+                <h2 id="formTitle">Создать новую задачу</h2>
+                <div class="error-message" id="errorMessage"></div>
+                
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="title" id="titleLabel">Название задачи:</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description" id="descLabel">Описание:</label>
+                        <textarea id="description" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority" id="priorityLabel">Приоритет:</label>
+                        <select id="priority" name="priority">
+                            <option value="low">Низкий</option>
+                            <option value="medium">Средний</option>
+                            <option value="high">Высокий</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deadline" id="deadlineLabel">Срок выполнения:</label>
+                        <input type="datetime-local" id="deadline" name="deadline">
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn">Создать задачу</button>
+                    <button type="button" class="btn btn-danger" onclick="syncTasks()" id="syncBtn">Синхронизировать</button>
+                </form>
+            </div>
+            
+            <div class="tasks-list">
+                <h2 id="tasksTitle">Список задач</h2>
+                <div id="tasksList" class="loading">Загрузка задач...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tasks = [];
+        let currentLanguage = 'ru';
+        let isOnline = navigator.onLine;
+        let syncInProgress = false;
+        let requestCount = 0;
+        
+        // БАГ 1: Проблема с API версионированием - используется устаревшая версия API
+        const API_BASE = 'https://api.tasktracker.com/v1'; // Должно быть v2
+        const API_TIMEOUT = 5000;
+        
+        // БАГ 2: Неправильная обработка сетевого состояния
+        window.addEventListener('online', () => {
+            isOnline = true;
+            updateConnectionStatus();
+            // Не синхронизируем данные автоматически при восстановлении соединения
+        });
+        
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            updateConnectionStatus();
+        });
+        
+        function updateConnectionStatus() {
+            const status = document.getElementById('connectionStatus');
+            if (isOnline) {
+                status.textContent = currentLanguage === 'ru' ? 'Подключено' : 'Connected';
+                status.className = 'connection-status online';
+            } else {
+                status.textContent = currentLanguage === 'ru' ? 'Нет соединения' : 'Offline';
+                status.className = 'connection-status offline';
+            }
+        }
+        
+        // БАГ 3: Множественные запросы не предотвращаются
+        async function syncTasks() {
+            if (!isOnline) {
+                showError(currentLanguage === 'ru' ? 'Нет подключения к интернету' : 'No internet connection');
+                return;
+            }
+            
+            // Не проверяем, идет ли уже синхронизация
+            syncInProgress = true;
+            requestCount++; // Увеличиваем счетчик запросов
+            
+            try {
+                // БАГ 4: Отсутствует обработка таймаутов
+                const response = await fetch(`${API_BASE}/tasks/sync`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // БАГ 5: Отсутствует версионирование в заголовках
+                    },
+                    body: JSON.stringify({ tasks: tasks, count: requestCount })
+                });
+                
+                // БАГ 6: Необработанные HTTP статусы
+                if (response.status === 429) { // Too Many Requests
+                    // Не обрабатываем этот случай
+                }
+                
+                const data = await response.json();
+                // БАГ 7: Несинхронизированное состояние при ошибках
+                if (data.error && data.error.includes('version mismatch')) {
+                    // Игнорируем ошибки версионирования
+                    console.log('Version mismatch ignored');
+                }
+                
+                showError('Синхронизация завершена (запрос #' + requestCount + ')');
+                
+            } catch (error) {
+                console.error('Sync error:', error);
+                showError('Ошибка синхронизации');
+            }
+            
+            syncInProgress = false;
+        }
+        
+        // БАГ 8: Проблемы с локализацией - неполный перевод
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            const translations = {
+                ru: {
+                    mainTitle: 'TaskTracker',
+                    subtitle: 'Управление задачами и проектами',
+                    formTitle: 'Создать новую задачу',
+                    titleLabel: 'Название задачи:',
+                    descLabel: 'Описание:',
+                    priorityLabel: 'Приоритет:',
+                    deadlineLabel: 'Срок выполнения:',
+                    submitBtn: 'Создать задачу',
+                    syncBtn: 'Синхронизировать',
+                    tasksTitle: 'Список задач'
+                },
+                en: {
+                    mainTitle: 'TaskTracker',
+                    subtitle: 'Task and Project Management',
+                    formTitle: 'Create New Task',
+                    titleLabel: 'Task Title:',
+                    descLabel: 'Description:',
+                    priorityLabel: 'Priority:',
+                    deadlineLabel: 'Deadline:',
+                    submitBtn: 'Create Task',
+                    syncBtn: 'Synchronize',
+                    tasksTitle: 'Task List'
+                    // БАГ: Отсутствуют переводы для приоритетов в select
+                }
+            };
+            
+            // Применяем переводы только для основных элементов
+            Object.keys(translations[lang]).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            updateConnectionStatus();
+        }
+        
+        // БАГ 9: Проблемы с часовыми поясами
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            // Всегда показываем время в UTC, игнорируя локальный часовой пояс
+            return date.toISOString().slice(0, 16).replace('T', ' ');
+        }
+        
+        function addTask(task) {
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task-item';
+            
+            // БАГ 10: Неправильное отображение времени
+            const deadlineText = task.deadline ? 
+                `Срок: ${formatDate(task.deadline)}` : 
+                'Без срока';
+            
+            taskElement.innerHTML = `
+                <div class="task-title">${task.title}</div>
+                <div class="task-description">${task.description || 'Без описания'}</div>
+                <div class="task-meta">
+                    <span class="task-priority priority-${task.priority}">
+                        ${task.priority === 'high' ? 'Высокий' : 
+                          task.priority === 'medium' ? 'Средний' : 'Низкий'}
+                    </span>
+                    <span class="task-date">${deadlineText}</span>
+                </div>
+            `;
+            
+            return taskElement;
+        }
+        
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<div class="loading">Нет задач</div>';
+                return;
+            }
+            
+            tasks.forEach(task => {
+                tasksList.appendChild(addTask(task));
+            });
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // БАГ 11: Проблемы с печатью - неправильное форматирование
+        function printTasks() {
+            // Не настраиваем правильные стили для печати
+            window.print(); // Печатает с фоновыми цветами и анимациями
+        }
+        
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const task = {
+                id: Date.now(),
+                title: formData.get('title'),
+                description: formData.get('description'),
+                priority: formData.get('priority'),
+                deadline: formData.get('deadline'),
+                created: new Date().toISOString()
+            };
+            
+            tasks.push(task);
+            renderTasks();
+            this.reset();
+            
+            // БАГ 12: Потеря данных при разрыве соединения
+            if (!isOnline) {
+                showError('Задача сохранена локально, но не синхронизирована с сервером');
+                // Не сохраняем в localStorage для восстановления после подключения
+            }
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateConnectionStatus();
+            renderTasks();
+            
+            // БАГ 13: Загрузка данных без обработки ошибок сети
+            setTimeout(() => {
+                // Имитация загрузки с сервера
+                tasks = [
+                    {
+                        id: 1,
+                        title: 'Тестовая задача',
+                        description: 'Это пример задачи для демонстрации',
+                        priority: 'high',
+                        deadline: '2025-07-25T10:00',
+                        created: '2025-07-19T08:00:00Z'
+                    }
+                ];
+                renderTasks();
+            }, 1000);
+        });
+        
+        // БАГ 14: Анимации не учитывают предпочтения пользователя
+        // Игнорируем prefers-reduced-motion
+        setInterval(() => {
+            const items = document.querySelectorAll('.task-item');
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        item.style.transform = 'scale(1)';
+                    }, 150);
+                }, index * 100);
+            });
+        }, 5000); // Анимация каждые 5 секунд
+    </script>
+</body>
+</html>
